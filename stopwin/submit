@@ -1,0 +1,9 @@
+sqsub -n 20 -r 7d -o ./out/log1.out --mpp 200G python -u stopwin_slipery.py 0.1
+sqsub -n 20 -r 7d -o ./out/log2.out --mpp 200G python -u stopwin_slipery.py 0.2
+sqsub -n 20 -r 7d -o ./out/log3.out --mpp 200G python -u stopwin_slipery.py 0.3
+sqsub -n 20 -r 7d -o ./out/log4.out --mpp 200G python -u stopwin_slipery.py 0.4
+sqsub -n 20 -r 7d -o ./out/log5.out --mpp 200G python -u stopwin_slipery.py 0.5
+sqsub -n 20 -r 7d -o ./out/log6.out --mpp 200G python -u stopwin_slipery.py 0.6
+sqsub -n 20 -r 7d -o ./out/log7.out --mpp 200G python -u stopwin_slipery.py 0.7
+sqsub -n 20 -r 7d -o ./out/log8.out --mpp 200G python -u stopwin_slipery.py 0.8
+sqsub -n 20 -r 7d -o ./out/log9.out --mpp 200G python -u stopwin_slipery.py 0.9
