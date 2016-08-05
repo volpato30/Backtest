@@ -19,6 +19,7 @@ from mewp.simulate.pair_exe import PairExeBase
 from mewp.data.order import OrderMethod
 from mewp.data.order import OrderType
 from mewp.simulate.report import Report
+from mewp.util.futures import get_best_pair
 from mewp.simulate.pair_exe import PairExePlusTick
 
 str_rate = sys.argv[1]
