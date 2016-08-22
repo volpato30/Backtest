@@ -1,5 +1,5 @@
 from sys import path
-path.append('/work/rqiao/HFdata/cython_mew-p')
+path.append('/work/rqiao/HFdata/mew-p')
 path.append('/work/rqiao/HFdata/algorithms')
 DATA_PATH = '/work/rqiao/HFdata/dockfuture'
 from mewp.simulate import MatchOptions
