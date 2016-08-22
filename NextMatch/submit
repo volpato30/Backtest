@@ -1,0 +1,1 @@
+sqsub -n 20 -q threaded -r 7d -o ./out/log1.out --mpp 200G python -u FutureMatch.py 0.1
