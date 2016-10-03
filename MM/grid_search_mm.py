@@ -1,6 +1,6 @@
 from sys import path
-path.append('/home/rui/blacksid/mew-p')
-DATA_PATH = '/home/rui/blacksid/data/dockfuture'
+path.append('/work/rqiao/HFdata/mew-p')
+DATA_PATH = '/work/rqiao/HFdata/dockfuture'
 from mewp.simulate.wrapper import MMWrapper
 from mewp.simulate.runner import SingleRunner
 from mewp.model.ladder_cython import LadderDual
