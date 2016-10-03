@@ -224,9 +224,8 @@ pars = list(itertools.product(ma_diff_length_list, trigger_diff_list, \
 num_cores = 32
 results = Parallel(n_jobs=num_cores)(delayed(run_simulation)(params) \
         for params in pars)
-try:
-    with open('results.p', 'wb') as f:
-        pickle.dump(results,f)
+with open('results.p', 'wb') as f:
+    pickle.dump(results,f)
 pnl = [i[0] for i in results]
 sharp_ratio = [i[1] for i in results]
 df = {'total_pnl': pnl, 'sharp_ratio': sharp_ratio}
