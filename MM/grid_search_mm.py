@@ -11,9 +11,11 @@ from mewp.util.mm import MMRecorder
 from mewp.util.mm import TrendManager
 from mewp.util.mm import TrendFinder
 from mewp.util.mm import TrendState
+from mewp.simulate.report import Report
 import matplotlib.pyplot as plt
+import pandas as pd
 import numpy as np
-import pandas
+import itertools
 from enum import Enum
 from joblib import Parallel, delayed
 import pickle
@@ -182,23 +184,52 @@ class MyMM(MMWrapper):
         self.block = 1000
         self.pause_count = 0
 
-def score(params):
+def run_simulation(params):
     date = '2015-01-01'
     dateend = '2015-05-01'
     ma_diff = []
     dates = [str(x).split(' ')[0] for x in pandas.date_range(date, dateend).tolist()]
     algo = { 'class': MyMM }
-    algo['param'] = params
+    temp = {'item': 'au1506'}
+    temp['ma_diff_length'] = params[0]
+    temp['trigger_diff'] = params[1]
+    temp['ma_window'] = params[2]
+    temp['spread'] = params[3]
+    temp['inv_coef'] = params[4]
+    temp['chunk'] = params[5]
+    temp['gap'] = params[6]
+    algo['param'] = temp
     settings = { 'date': dates, 'algo': algo, 'tickset': 'top', 'verbose' : True,
                      'path': DATA_PATH }
     runner = SingleRunner(settings)
     runner.run()
-    pnl = runner.account.get_pnl()
-    return pnl
+    report = Report(runner)
+    pnl = report.get_final_pnl()
+    sharp_ratio = report.get_sharpie_ratio()
+    return pnl, sharp_ratio
 
 #algo['param'] = {'item': 'au1612', 'ma_diff_length': 1000, 'trigger_diff': 12, 'ma_window': 500, 'spread': 4, 'inv_coef': 2, 'chunk': 3, 'gap': 3}
 # A Search space with all the combinations over which the function will be minimized
 
-params = {'item': 'au1506', 'ma_diff_length': 1000, 'trigger_diff': 12, 'ma_window': 500, 'spread': 4, 'inv_coef': 2, 'chunk': 3, 'gap': 3}
-pnl = score(params)
-print pnl
+ma_diff_length_list = np.arange(500,2000,500) # 3 params
+trigger_diff_list = np.arange(6,21,3) # 5 params
+ma_window_list = np.arange(500,2000,500) # 3 params
+spread_list = np.arange(2,7,1) # 5 params
+inv_coef_list = np.arange(1,5,1) # 4 params
+chunk_list = np.arange(2,5,1) # 3 params
+gap_list = np.arange(2,5,1) # 3 params
+# in total 8100 param combinations
+pars = list(itertools.product(ma_diff_length_list, trigger_diff_list, \
+        ma_window_list, spread_list, inv_coef_list, chunk_list, gap_list))
+num_cores = 32
+results = Parallel(n_jobs=num_cores)(delayed(run_simulation)(params) \
+        for params in pars)
+try:
+    with open('results.p', 'wb') as f:
+        pickle.dump(results,f)
+pnl = [i[0] for i in results]
+sharp_ratio = [i[1] for i in results]
+df = {'total_pnl': pnl, 'sharp_ratio': sharp_ratio}
+df = pd.DataFrame(df)
+df.index = pars
+df.to_csv('./au_backtest.csv')
