@@ -15,8 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas
 from enum import Enum
-from hyperopt import hp
-from hyperopt import fmin, tpe, hp, STATUS_OK,Trials
+from joblib import Parallel, delayed
 import pickle
 
 class VolatilityState(Enum):
