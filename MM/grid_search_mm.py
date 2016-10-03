@@ -201,21 +201,23 @@ def score(params):
 
 #algo['param'] = {'item': 'au1612', 'ma_diff_length': 1000, 'trigger_diff': 12, 'ma_window': 500, 'spread': 4, 'inv_coef': 2, 'chunk': 3, 'gap': 3}
 # A Search space with all the combinations over which the function will be minimized
-space ={
-    'ma_diff_length':hp.quniform('ma_diff_length',500,2000,500),
-    'trigger_diff':hp.quniform('trigger_diff',9,21,3),
-    'ma_window':hp.quniform('ma_window',250,2000,250),
-    'spread': hp.quniform('spread',2,7,1),
-    'inv_coef': hp.quniform('inv_coef',1,4,1),
-    'chunk':hp.quniform('chunk',2,5,1),
-    'gap':hp.quniform('gap',2,5,1),
-    'item':'au1612'
-}
+def score(params):
+    date = '2015-01-01'
+    dateend = '2015-12-29'
+    ma_diff = []
+    dates = [str(x).split(' ')[0] for x in pandas.date_range(date, dateend).tolist()]
+    algo = { 'class': MyMM }
+    algo['param'] = params
+    settings = { 'date': dates, 'algo': algo, 'tickset': 'top', 'verbose' : False,
+                     'path': DATA_PATH }
+    runner = SingleRunner(settings)
+    runner.run()
+    pnl = runner.account.get_pnl()
+    return pnl
 
-trials=Trials()
+#algo['param'] = {'item': 'au1612', 'ma_diff_length': 1000, 'trigger_diff': 12, 'ma_window': 500, 'spread': 4, 'inv_coef': 2, 'chunk': 3, 'gap': 3}
+# A Search space with all the combinations over which the function will be minimized
 
-best=fmin(score,space,algo=tpe.suggest,trials=trials,max_evals=200)
-print best
-
-with open('trials.p','wb') as f:
-    pickle.dump(trials,f)
+params = {'item': 'au', 'ma_diff_length': 1000, 'trigger_diff': 12, 'ma_window': 500, 'spread': 4, 'inv_coef': 2, 'chunk': 3, 'gap': 3}
+pnl = score(params)
+print pnl
