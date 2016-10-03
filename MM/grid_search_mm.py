@@ -183,32 +183,13 @@ class MyMM(MMWrapper):
         self.pause_count = 0
 
 def score(params):
-    date = '2016-07-01'
-    dateend = '2016-09-29'
+    date = '2015-01-01'
+    dateend = '2015-05-01'
     ma_diff = []
     dates = [str(x).split(' ')[0] for x in pandas.date_range(date, dateend).tolist()]
     algo = { 'class': MyMM }
     algo['param'] = params
     settings = { 'date': dates, 'algo': algo, 'tickset': 'top', 'verbose' : True,
-                     'path': DATA_PATH }
-    runner = SingleRunner(settings)
-    runner.run()
-    loss = -runner.account.get_pnl()
-    del runner.account
-    del runner._algo
-    del runner
-    return {'loss':loss,'status':STATUS_OK}
-
-#algo['param'] = {'item': 'au1612', 'ma_diff_length': 1000, 'trigger_diff': 12, 'ma_window': 500, 'spread': 4, 'inv_coef': 2, 'chunk': 3, 'gap': 3}
-# A Search space with all the combinations over which the function will be minimized
-def score(params):
-    date = '2015-01-01'
-    dateend = '2015-12-29'
-    ma_diff = []
-    dates = [str(x).split(' ')[0] for x in pandas.date_range(date, dateend).tolist()]
-    algo = { 'class': MyMM }
-    algo['param'] = params
-    settings = { 'date': dates, 'algo': algo, 'tickset': 'top', 'verbose' : False,
                      'path': DATA_PATH }
     runner = SingleRunner(settings)
     runner.run()
@@ -218,6 +199,6 @@ def score(params):
 #algo['param'] = {'item': 'au1612', 'ma_diff_length': 1000, 'trigger_diff': 12, 'ma_window': 500, 'spread': 4, 'inv_coef': 2, 'chunk': 3, 'gap': 3}
 # A Search space with all the combinations over which the function will be minimized
 
-params = {'item': 'au', 'ma_diff_length': 1000, 'trigger_diff': 12, 'ma_window': 500, 'spread': 4, 'inv_coef': 2, 'chunk': 3, 'gap': 3}
+params = {'item': 'au1506', 'ma_diff_length': 1000, 'trigger_diff': 12, 'ma_window': 500, 'spread': 4, 'inv_coef': 2, 'chunk': 3, 'gap': 3}
 pnl = score(params)
 print pnl
