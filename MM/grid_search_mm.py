@@ -188,7 +188,7 @@ def run_simulation(params):
     date = '2015-01-01'
     dateend = '2015-05-01'
     ma_diff = []
-    dates = [str(x).split(' ')[0] for x in pandas.date_range(date, dateend).tolist()]
+    dates = [str(x).split(' ')[0] for x in pd.date_range(date, dateend).tolist()]
     algo = { 'class': MyMM }
     temp = {'item': 'au1506'}
     temp['ma_diff_length'] = params[0]
