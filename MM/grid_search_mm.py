@@ -109,7 +109,7 @@ class MyMM(MMWrapper):
             self.ladder.refresh(mid, self.chunk)
 
     def day_setup(self):
-        self.mid_roll = SimpleMoving(size=500)
+        self.mid_roll = SimpleMoving(self.param['ma_window'])
         self.spread = self.param['spread']
         self.ladder = LadderDual(self.item, qty=1, account=self.account, \
                                  spread=self.spread, gap=self.param['gap'], depth=3)
