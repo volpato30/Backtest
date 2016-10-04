@@ -7,10 +7,6 @@ from mewp.model.ladder_cython import LadderDual
 from mewp.util.clock import Clock
 from mewp.math.simple import SimpleMoving
 from mewp.util.trade_period import Period
-from mewp.util.mm import MMRecorder
-from mewp.util.mm import TrendManager
-from mewp.util.mm import TrendFinder
-from mewp.util.mm import TrendState
 from mewp.simulate.report import Report
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -44,57 +40,7 @@ class VolatilityFinder(object):
         elif self.state == VolatilityState.NORMAL:
             if abs(ma_diff) > self.trigger_diff:
                 self.state = VolatilityState.LARGE
-#
-class MyTrendFinder(TrendFinder):
-    def __init__(self):
-        self.price_diff = SimpleMoving(size=20)
-        self.short = SimpleMoving(size=10)
-        self.long = SimpleMoving(size=8000)
 
-        self.extend_period = 10 * 60 * 1000
-        self.trigger_diff = 0.8
-        self.extend_diff = 0.5
-        self.volume_diff = 400
-        self.volume_roll = []
-        self.pd_roll = []
-        self.last_v = 0
-        self.last_p = 0
-
-    # per tick checkpoint, for updating internal states
-    def checkpoint(self, info):
-        mid = (info.ask_1_price + info.bid_1_price)*0.5
-        if self.last_p == 0:
-            self.last_p = mid
-        pd = abs(mid-self.last_p)
-        self.short.add(mid)
-        self.long.add(mid)
-        self.price_diff.add(pd)
-        self.volume_roll.append(info.volume - self.last_v)
-        self.pd_roll.append(self.price_diff.mean)
-        self.last_v = info.volume
-        self.last_p = mid
-
-    # check if should start
-    def do_start(self, info):
-        if self.volume_roll[-1] > self.volume_diff:
-            return TrendState.UP_OR_DOWN
-
-        if self.short.mean - self.long.mean > self.trigger_diff:
-            return TrendState.UP
-
-        if self.long.mean - self.short.mean > self.trigger_diff:
-            return TrendState.DOWN
-
-        return TrendState.NO
-
-    # check if should extend
-    def do_extend(self, info, curend):
-        if self.volume_roll[-1] > self.volume_diff:
-            return Clock.timestamp + self.extend_period
-        if abs(self.short.mean - self.long.mean) > self.extend_diff:
-            return Clock.timestamp + self.extend_period
-        return curend
-#
 class MyMM(MMWrapper):
 
     # ------------------- wrapper call backs ---------------
@@ -103,8 +49,6 @@ class MyMM(MMWrapper):
         super(MyMM, self).param_updated()
 
         self.last_pnl = 0
-        self.trend_manager = TrendManager(finder = MyTrendFinder())
-        self.record = MMRecorder(self.item, self.account)
         self.volatility_finder = VolatilityFinder(self.param['ma_diff_length'], self.param['trigger_diff'])
         self.inv = self.param['inv_coef'] * self.item.symbol.min_ticksize
         self.chunk = self.param['chunk']
@@ -118,7 +62,6 @@ class MyMM(MMWrapper):
         self.day_setup()
 
     def on_dayend(self, date, info):
-        self.trend_manager.end()
         self.ladder.stop()
         self.account.clear()
 
@@ -131,11 +74,9 @@ class MyMM(MMWrapper):
 
     def on_tick(self, multiple, contract, info):
         self.tick_count += 1
-        self.record.checkpoint(info)
-        self.trend_manager.checkpoint(info)
-        self.mid_roll.add(self.record.last_mid)
-        self.volatility_finder.checkpoint((self.record.last_mid-self.mid_roll.mean)/self.item.symbol.min_ticksize)
-        #ma_diff.append((self.record.last_mid-self.mid_roll.mean)/0.05)
+        self.mid_price = (info.ask_1_price + info.bid_1_price)/2.0
+        self.mid_roll.add(self.mid_price)
+        self.volatility_finder.checkpoint((self.mid_price-self.mid_roll.mean)/self.item.symbol.min_ticksize)
 
         if self.tick_count < self.block:
             return
@@ -145,12 +86,6 @@ class MyMM(MMWrapper):
             self.pause_count -= 1
             return
 
-#         #  trending
-#         if self.trend_manager.is_trending():
-#             if self.ladder.is_running():
-#                 self.ladder.stop()
-#             return
-
         # check volatility state:
         if self.volatility_finder.state == VolatilityState.LARGE:
             if self.ladder.is_running():
@@ -158,14 +93,12 @@ class MyMM(MMWrapper):
             return
 
         # check current mid price
-        if abs(self.record.last_mid-self.mid_roll.mean) > self.spread * self.item.symbol.min_ticksize:
+        if abs(self.mid_price-self.mid_roll.mean) > self.spread * self.item.symbol.min_ticksize:
             return
             #self.pause_for_n_ticks(1000)
 
 
         #check position, stop bid or ask side
-
-
 
         # if not LARGE volatility
         if not self.ladder.is_running():
@@ -206,6 +139,12 @@ def run_simulation(params):
     report = Report(runner)
     pnl = report.get_final_pnl()
     sharp_ratio = report.get_sharpie_ratio()
+    del runner._algo.volatility_finder
+    del runner._algo
+    runner.close()
+    del runner._me
+    del runner._price_table
+    del runner
     return pnl, sharp_ratio
 
 #algo['param'] = {'item': 'au1612', 'ma_diff_length': 1000, 'trigger_diff': 12, 'ma_window': 500, 'spread': 4, 'inv_coef': 2, 'chunk': 3, 'gap': 3}
