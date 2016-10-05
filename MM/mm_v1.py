@@ -157,12 +157,12 @@ def run_simulation(params):
 # A Search space with all the combinations over which the function will be minimized
 
 ma_diff_length_list = np.arange(500,2000,500) # 3 params
-trigger_diff_list = np.arange(6,21,3) # 5 params
+trigger_diff_list = np.arange(9,21,3) # 4 params
 ma_window_list = np.arange(1000,2500,500) # 3 params
 spread_list = np.arange(2,7,1) # 5 params
-inv_coef_list = np.arange(1,5,1) # 4 params
+inv_coef_list = np.concatenate((0.5, np.arange(1,4,1))) # 4 params
 chunk_list = np.arange(3,6,1) # 3 params
-gap_list = np.arange(2,6,1) # 4 params
+gap_list = np.arange(2,5,1) # 3 params
 # in total 10800 param combinations
 pars = list(itertools.product(ma_diff_length_list, trigger_diff_list, \
         ma_window_list, spread_list, inv_coef_list, chunk_list, gap_list))
