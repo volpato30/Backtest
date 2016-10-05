@@ -160,7 +160,7 @@ ma_diff_length_list = np.arange(500,2000,500) # 3 params
 trigger_diff_list = np.arange(9,21,3) # 4 params
 ma_window_list = np.arange(1000,2500,500) # 3 params
 spread_list = np.arange(2,7,1) # 5 params
-inv_coef_list = np.concatenate((0.5, np.arange(1,4,1))) # 4 params
+inv_coef_list = np.concatenate(([0.5], np.arange(1,4,1))) # 4 params
 chunk_list = np.arange(3,6,1) # 3 params
 gap_list = np.arange(2,5,1) # 3 params
 # in total 10800 param combinations
