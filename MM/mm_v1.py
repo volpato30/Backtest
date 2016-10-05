@@ -142,13 +142,16 @@ def run_simulation(params):
     report = Report(runner)
     pnl = report.get_final_pnl()
     sharp_ratio = report.get_sharpie_ratio()
+    orders = runner.account.orders.to_dataframe()
+    filled = orders.loc[orders.qty_filled > 0]
+    cancel_orders = len(orders) - len(filled)
     del runner._algo.volatility_finder
     del runner._algo
     runner.close()
     del runner._me
     del runner._price_table
     del runner
-    return pnl, sharp_ratio
+    return pnl, sharp_ratio, cancel_orders
 
 #algo['param'] = {'item': 'au1612', 'ma_diff_length': 1000, 'trigger_diff': 12, 'ma_window': 500, 'spread': 4, 'inv_coef': 2, 'chunk': 3, 'gap': 3}
 # A Search space with all the combinations over which the function will be minimized
@@ -170,7 +173,8 @@ with open('results.p', 'wb') as f:
     pickle.dump(results,f)
 pnl = [i[0] for i in results]
 sharp_ratio = [i[1] for i in results]
-df = {'total_pnl': pnl, 'sharp_ratio': sharp_ratio}
+cancel_orders = [i[2] for i in results]
+df = {'total_pnl': pnl, 'sharp_ratio': sharp_ratio, 'cancel_orders': cancel_orders}
 df = pd.DataFrame(df)
 df.index = pars
 df.to_csv('./out/{}_backtest_v1.csv'.format(PRODUCT))

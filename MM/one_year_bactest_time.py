@@ -142,13 +142,16 @@ def run_simulation(params):
     report = Report(runner)
     pnl = report.get_final_pnl()
     sharp_ratio = report.get_sharpie_ratio()
+    orders = runner.account.orders.to_dataframe()
+    filled = orders.loc[orders.qty_filled > 0]
+    cancel_orders = len(orders) - len(filled)
     del runner._algo.volatility_finder
     del runner._algo
     runner.close()
     del runner._me
     del runner._price_table
     del runner
-    return pnl, sharp_ratio
+    return pnl, sharp_ratio, cancel_orders
 
 #algo['param'] = {'item': 'au1612', 'ma_diff_length': 1000, 'trigger_diff': 12, 'ma_window': 500, 'spread': 4, 'inv_coef': 2, 'chunk': 3, 'gap': 3}
 # A Search space with all the combinations over which the function will be minimized
