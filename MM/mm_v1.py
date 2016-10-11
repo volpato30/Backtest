@@ -127,13 +127,13 @@ def run_simulation(params):
     dates = [str(x).split(' ')[0] for x in pd.date_range(date, dateend).tolist()]
     algo = { 'class': MyMM }
     temp = {'item': PRODUCT}
-    temp['ma_diff_length'] = params[0]
-    temp['trigger_diff'] = params[1]
-    temp['ma_window'] = params[2]
-    temp['spread'] = params[3]
-    temp['inv_coef'] = params[4]
-    temp['chunk'] = params[5]
-    temp['gap'] = params[6]
+    temp['ma_diff_length'] = params[1]
+    temp['trigger_diff'] = params[0]
+    temp['ma_window'] = params[1]
+    temp['spread'] = params[2]
+    temp['inv_coef'] = params[3]
+    temp['chunk'] = params[4]
+    temp['gap'] = params[5]
     algo['param'] = temp
     settings = { 'date': dates, 'algo': algo, 'tickset': 'top', 'verbose' : True,
                      'path': DATA_PATH }
@@ -156,11 +156,10 @@ def run_simulation(params):
 #algo['param'] = {'item': 'au1612', 'ma_diff_length': 1000, 'trigger_diff': 12, 'ma_window': 500, 'spread': 4, 'inv_coef': 2, 'chunk': 3, 'gap': 3}
 # A Search space with all the combinations over which the function will be minimized
 
-ma_diff_length_list = np.arange(500,2000,500) # 3 params
-trigger_diff_list = np.arange(9,21,3) # 4 params
-ma_window_list = np.arange(1000,2500,500) # 3 params
-spread_list = np.arange(2,7,1) # 5 params
-inv_coef_list = np.concatenate(([0.5], np.arange(1,4,1))) # 4 params
+trigger_diff_list = [12, 18] # 2 params
+ma_window_list = [1000, 3000] # 2 params
+spread_list = np.arange(3,7,1) # 4 params
+inv_coef_list = np.concatenate(([0.5], np.arange(1,3,1))) # 3 params
 chunk_list = np.arange(3,6,1) # 3 params
 gap_list = np.arange(2,5,1) # 3 params
 # in total 10800 param combinations
